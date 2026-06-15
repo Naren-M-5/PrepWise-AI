@@ -9,7 +9,7 @@ import type {
   QuizResult
 } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 class ApiError extends Error {
   status: number;
@@ -20,8 +20,11 @@ class ApiError extends Error {
   }
 }
 
-async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+async function request<T>(endpoint: string, options: RequestInit = {}, timeoutMs: number = 45000): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
+  
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
   
   const headers = new Headers(options.headers || {});
   if (!(options.body instanceof FormData) && !headers.has('Content-Type')) {
@@ -31,10 +34,12 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   const config = {
     ...options,
     headers,
+    signal: controller.signal,
   };
 
   try {
     const response = await fetch(url, config);
+    clearTimeout(id);
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ error: 'Unknown server error' }));
@@ -42,7 +47,11 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     }
     
     return await response.json() as T;
-  } catch (error) {
+  } catch (error: any) {
+    clearTimeout(id);
+    if (error.name === 'AbortError') {
+      throw new Error('Request timed out. The server took too long to respond. (Render cold starts can take up to 50 seconds)');
+    }
     console.error(`API Request to ${endpoint} failed:`, error);
     throw error;
   }

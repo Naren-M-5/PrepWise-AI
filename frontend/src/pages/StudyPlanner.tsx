@@ -20,8 +20,8 @@ export default function StudyPlanner() {
     setActivePlan(plan);
   }, []);
 
-  const handleGeneratePlan = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleGeneratePlan = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!subjects.trim() || !examDate || isLoading) return;
 
     setIsLoading(true);
@@ -53,6 +53,11 @@ export default function StudyPlanner() {
 
       storageService.saveStudyPlan(newPlan);
       setActivePlan(newPlan);
+      
+      // Dispatch success toast
+      window.dispatchEvent(new CustomEvent('show-toast', { 
+        detail: { message: 'Study Plan generated successfully!', type: 'success' } 
+      }));
     } catch (err: any) {
       console.error(err);
       const msg = err.message || "Unknown error";
@@ -61,6 +66,11 @@ export default function StudyPlanner() {
       } else {
         setError(`Failed to generate study plan: ${msg}. Please check the Flask server logs for details.`);
       }
+      
+      // Dispatch error toast
+      window.dispatchEvent(new CustomEvent('show-toast', { 
+        detail: { message: 'Failed to generate Study Plan.', type: 'error' } 
+      }));
     } finally {
       setIsLoading(false);
     }
@@ -83,9 +93,19 @@ export default function StudyPlanner() {
       </div>
 
       {error && (
-        <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-650 dark:text-red-400 rounded-2xl flex items-start space-x-3 text-sm">
-          <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
-          <span>{error}</span>
+        <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-655 dark:text-red-400 rounded-2xl space-y-3 text-sm animate-fade-in">
+          <div className="flex items-start space-x-3">
+            <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+            <span>{error}</span>
+          </div>
+          <div className="pl-8">
+            <button
+              onClick={() => handleGeneratePlan()}
+              className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-xl text-xs transition active:scale-95 cursor-pointer focus:outline-none"
+            >
+              Retry Planner Draft
+            </button>
+          </div>
         </div>
       )}
 

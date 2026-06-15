@@ -124,6 +124,11 @@ export default function UploadNotes({ setPage, setSelectedSessionId }: UploadNot
       storageService.setActiveSessionId(newSession.id);
       setSelectedSessionId(newSession.id);
       
+      // Dispatch success toast
+      window.dispatchEvent(new CustomEvent('show-toast', { 
+        detail: { message: 'Study Kit compiled successfully!', type: 'success' } 
+      }));
+      
       // Auto redirect to study kit
       setPage('study-kit');
     } catch (err: any) {
@@ -134,7 +139,11 @@ export default function UploadNotes({ setPage, setSelectedSessionId }: UploadNot
       } else {
         setError(`AI Processing failed: ${msg}. Please check the Flask server logs for details.`);
       }
-      setIsProcessing(false);
+      
+      // Dispatch error toast
+      window.dispatchEvent(new CustomEvent('show-toast', { 
+        detail: { message: 'Failed to compile Study Kit resources.', type: 'error' } 
+      }));
     }
   };
 
@@ -331,6 +340,39 @@ export default function UploadNotes({ setPage, setSelectedSessionId }: UploadNot
                   {extractedText}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Error boundary and retry actions */}
+          {error && (
+            <div className="border-t border-slate-100 dark:border-slate-850 pt-5 space-y-4">
+              <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 rounded-2xl flex items-start space-x-3 text-xs">
+                <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+              <div className="flex space-x-3">
+                <button
+                  onClick={handleProcessNotes}
+                  className="bg-brand-600 hover:bg-brand-505 text-white font-bold py-2.5 px-5 rounded-2xl text-xs transition active:scale-95 cursor-pointer focus:outline-none"
+                >
+                  Retry Generation
+                </button>
+                <button
+                  onClick={() => {
+                    setIsProcessing(false);
+                    setError(null);
+                    setExtractionStatus('pending');
+                    setSummaryStatus('pending');
+                    setRevisionStatus('pending');
+                    setFlashcardStatus('pending');
+                    setQuizStatus('pending');
+                    setExtractedText('');
+                  }}
+                  className="bg-slate-250 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold py-2.5 px-5 rounded-2xl text-xs transition active:scale-95 cursor-pointer focus:outline-none"
+                >
+                  Start Over
+                </button>
+              </div>
             </div>
           )}
         </div>

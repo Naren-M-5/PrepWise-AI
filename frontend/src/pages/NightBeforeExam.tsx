@@ -4,7 +4,11 @@ import { apiService } from '../services/api';
 import { storageService } from '../services/storage';
 import { Sparkles, Clock, AlertTriangle, HelpCircle, CheckSquare, ShieldAlert, ArrowLeft, Loader2, Info, FileText } from 'lucide-react';
 
-export default function NightBeforeExam() {
+interface NightBeforeExamProps {
+  setPage: (page: string) => void;
+}
+
+export default function NightBeforeExam({ setPage }: NightBeforeExamProps) {
   const [sessions, setSessions] = useState<StudySession[]>([]);
   const [selectedSessionId, setSelectedSessionId] = useState('');
   const [timeLeft, setTimeLeft] = useState('3 hours');
@@ -23,8 +27,8 @@ export default function NightBeforeExam() {
     }
   }, []);
 
-  const handleGenerateCramKit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleGenerateCramKit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!selectedSessionId || isLoading) return;
 
     setIsLoading(true);
@@ -45,6 +49,11 @@ export default function NightBeforeExam() {
       storageService.saveSession(session);
       
       setCramData(data);
+      
+      // Dispatch success toast
+      window.dispatchEvent(new CustomEvent('show-toast', { 
+        detail: { message: 'Cram Sheet compiled successfully!', type: 'success' } 
+      }));
     } catch (err: any) {
       console.error(err);
       const msg = err.message || "Unknown error";
@@ -53,6 +62,11 @@ export default function NightBeforeExam() {
       } else {
         setError(`Failed to compile Cram Sheet: ${msg}. Please check the Flask server logs for details.`);
       }
+      
+      // Dispatch error toast
+      window.dispatchEvent(new CustomEvent('show-toast', { 
+        detail: { message: 'Failed to compile Cram Sheet.', type: 'error' } 
+      }));
     } finally {
       setIsLoading(false);
     }
@@ -80,9 +94,19 @@ export default function NightBeforeExam() {
       </div>
 
       {error && (
-        <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-650 dark:text-red-400 rounded-2xl flex items-start space-x-3 text-sm">
-          <ShieldAlert className="h-5 w-5 mt-0.5 flex-shrink-0" />
-          <span>{error}</span>
+        <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-655 dark:text-red-400 rounded-2xl space-y-3 text-sm animate-fade-in">
+          <div className="flex items-start space-x-3">
+            <ShieldAlert className="h-5 w-5 mt-0.5 flex-shrink-0" />
+            <span>{error}</span>
+          </div>
+          <div className="pl-8">
+            <button
+              onClick={() => handleGenerateCramKit()}
+              className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-xl text-xs transition active:scale-95 cursor-pointer focus:outline-none"
+            >
+              Retry Compilation
+            </button>
+          </div>
         </div>
       )}
 
@@ -200,8 +224,8 @@ export default function NightBeforeExam() {
               </p>
               <button
                 type="button"
-                onClick={() => window.location.reload()} // Actually we want setPage('upload') but we don't have it inside this hook directly unless passed, wait! We can just tell them to upload notes. Or we can reload.
-                className="bg-red-500 hover:bg-red-400 text-white font-bold py-2.5 px-6 rounded-xl text-sm"
+                onClick={() => setPage('upload')}
+                className="bg-red-500 hover:bg-red-400 text-white font-bold py-2.5 px-6 rounded-xl text-sm cursor-pointer"
               >
                 Go to Upload Notes
               </button>

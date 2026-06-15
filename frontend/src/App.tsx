@@ -5,11 +5,13 @@ import UploadNotes from './pages/UploadNotes';
 import StudyKit from './pages/StudyKit';
 import StudyPlanner from './pages/StudyPlanner';
 import NightBeforeExam from './pages/NightBeforeExam';
+import Toast from './components/Toast';
 import { storageService } from './services/storage';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<string>('dashboard');
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   // Initialize theme on app mount
   useEffect(() => {
@@ -24,6 +26,22 @@ export default function App() {
       root.classList.remove('dark');
       body.classList.remove('dark');
     }
+  }, []);
+
+  // Listen for toast dispatches
+  useEffect(() => {
+    const handleToast = (e: Event) => {
+      const customEvent = e as CustomEvent<{ message: string; type: 'success' | 'error' }>;
+      if (customEvent.detail) {
+        setToast({
+          message: customEvent.detail.message,
+          type: customEvent.detail.type
+        });
+      }
+    };
+    
+    window.addEventListener('show-toast', handleToast);
+    return () => window.removeEventListener('show-toast', handleToast);
   }, []);
 
   const navigateToPage = (pageName: string) => {
@@ -59,9 +77,19 @@ export default function App() {
         )}
         
         {currentPage === 'night-before' && (
-          <NightBeforeExam />
+          <NightBeforeExam setPage={navigateToPage} />
         )}
       </main>
+
+      {/* Global Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }
+

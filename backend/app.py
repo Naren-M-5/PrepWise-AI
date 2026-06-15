@@ -996,6 +996,10 @@ def api_night_before_exam():
     # Fallback Mock response
     return jsonify(get_topic_mock_data(topic)["night_before"])
 
+@app.route("/health", methods=["GET"])
+def api_health():
+    return jsonify({"status": "ok"})
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     # Run server locally on 0.0.0.0 to enable network/device testing if needed

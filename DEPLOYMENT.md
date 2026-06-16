@@ -40,7 +40,7 @@ Vercel hosts the React/Vite frontend client, building static assets and hosting 
     *   **Framework Preset**: `Vite` (Vercel auto-detects this).
     *   **Root Directory**: Click *Edit* and select the `frontend` folder (CRITICAL).
 4.  **Set Environment Variables**: Expand the **Environment Variables** section and add:
-    *   `VITE_API_BASE_URL` = `https://your-render-backend-url.onrender.com` *(Paste the URL copied from Render)*
+    *   `VITE_API_URL` = `https://your-render-backend-url.onrender.com` *(Paste the URL copied from Render)*
     *   `VITE_USE_FIREBASE` = `false`
 5.  **Deploy**: Click **Deploy**. Vercel will run `tsc -b && vite build` and serve the application.
 6.  **Update backend CORS (Optional)**: If you implement strict CORS lists, configure your Render service environment variables to allow requests from your Vercel deployment URL (e.g., `https://prepwise-ai.vercel.app`).

@@ -7,12 +7,11 @@ import tempfile
 from datetime import datetime
 
 # Ensure the backend directory is in the python path to reuse existing extraction and prompt logic
-# Since this file is in src/, we go up one level to find the backend folder
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "backend"))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "backend"))
 
 # Load env variables
 from dotenv import load_dotenv
-load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "backend", ".env"))
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "backend", ".env"))
 
 # Import backend helper functions
 try:
@@ -531,7 +530,7 @@ if load_mock_sample:
     try:
         sample_path = "sample.pdf"
         if not os.path.exists(sample_path):
-            sample_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "sample.pdf")
+            sample_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sample.pdf")
             
         if os.path.exists(sample_path):
             st.session_state.extracted_text = backend_app.extract_pdf_text(sample_path)

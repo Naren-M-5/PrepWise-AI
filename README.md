@@ -1,4 +1,16 @@
+---
+title: PrepWise AI
+emoji: 🎓
+colorFrom: purple
+colorTo: blue
+sdk: streamlit
+sdk_version: 1.58.0
+app_file: streamlit_app.py
+pinned: false
+---
+
 # 🚀 PrepWise AI
+
 
 > **"Transform lecture notes into personalized exam success."**
 

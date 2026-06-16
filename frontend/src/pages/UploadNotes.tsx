@@ -135,14 +135,14 @@ export default function UploadNotes({ setPage, setSelectedSessionId }: UploadNot
       console.error(err);
       const msg = err.message || "Unknown error";
       if (msg.includes("Failed to fetch") || msg.includes("NetworkError")) {
-        setError("Unable to connect to the backend server. Please verify that the Flask server is running at http://localhost:5000.");
+        setError("AI features require the Flask backend to be running locally. Please verify that the Flask server is running at http://localhost:5000.");
       } else {
         setError(`AI Processing failed: ${msg}. Please check the Flask server logs for details.`);
       }
       
       // Dispatch error toast
       window.dispatchEvent(new CustomEvent('show-toast', { 
-        detail: { message: 'Failed to compile Study Kit resources.', type: 'error' } 
+        detail: { message: 'AI features require the Flask backend to be running locally.', type: 'error' } 
       }));
     }
   };

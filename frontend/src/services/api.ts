@@ -50,7 +50,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}, timeoutMs
   } catch (error: any) {
     clearTimeout(id);
     if (error.name === 'AbortError') {
-      throw new Error('Request timed out. The server took too long to respond. (Render cold starts can take up to 50 seconds)');
+      throw new Error('Request timed out. The local Flask backend took too long to respond. Please make sure it is active.');
     }
     console.error(`API Request to ${endpoint} failed:`, error);
     throw error;

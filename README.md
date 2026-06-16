@@ -5,7 +5,7 @@
 ### 🎥 Demo
 This repository includes the complete source code, walkthrough screenshots, and a demo video showing the interactive study tools in action. 
 
-To avoid introducing paid cloud hosting or card-verification setups (as platforms like Render now require paid plans for persistent database integrations), the backend is designed to run locally. You can spin up the full application on your own machine in under two minutes by following the [Running Locally](#%EF%B8%8F-running-locally) instructions below.
+The backend is designed to run locally to keep the project simple to reproduce and evaluate without relying on external services. You can spin up the full application on your own machine in under two minutes by following the [Running Locally](#%EF%B8%8F-running-locally) instructions below.
 
 
 PrepWise AI is a web application designed to help students study more efficiently. When preparing for exams, a lot of time is often wasted on organizing materials—summarizing slides, writing out flashcards, compiling formulas, and searching for practice questions. By the time the study guides are ready, you are already exhausted.

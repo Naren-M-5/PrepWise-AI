@@ -7,11 +7,12 @@ import tempfile
 from datetime import datetime
 
 # Ensure the backend directory is in the python path to reuse existing extraction and prompt logic
-sys.path.append(os.path.join(os.path.dirname(__file__), "backend"))
+# Since this file is in src/, we go up one level to find the backend folder
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "backend"))
 
 # Load env variables
 from dotenv import load_dotenv
-load_dotenv(os.path.join(os.path.dirname(__file__), "backend", ".env"))
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "backend", ".env"))
 
 # Import backend helper functions
 try:
@@ -527,11 +528,10 @@ st.markdown('<div class="hero-subtitle">Transform lecture notes into personalize
 # Loading mock databases pdf automatically if requested
 load_mock_sample = st.button("📂 Load Sample Database Notes (Quick Test)", help="Instantly test all features without uploading your own PDF.")
 if load_mock_sample:
-    # Look for sample.pdf or backend/temp/sample.pdf or create mock text
     try:
         sample_path = "sample.pdf"
         if not os.path.exists(sample_path):
-            sample_path = os.path.join(os.path.dirname(__file__), "sample.pdf")
+            sample_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "sample.pdf")
             
         if os.path.exists(sample_path):
             st.session_state.extracted_text = backend_app.extract_pdf_text(sample_path)
@@ -689,10 +689,8 @@ if st.session_state.extracted_text:
                     st.rerun()
                     
             with col_card_body:
-                # Progress text
                 st.markdown(f"<div style='text-align:center; color:#64748b;'>Card {card_idx + 1} of {total_cards}</div>", unsafe_allow_html=True)
                 
-                # Dynamic visual rendering based on flip state
                 if st.session_state.reveal_flashcard:
                     st.markdown(f"""
                     <div class="flashcard-box">
@@ -734,7 +732,6 @@ if st.session_state.extracted_text:
         st.subheader("❓ Practice Quiz & Feedback")
         
         if quiz:
-            # Render Quiz form
             quiz_score_counter = 0
             
             for idx, q in enumerate(quiz):
@@ -746,12 +743,8 @@ if st.session_state.extracted_text:
                 
                 st.markdown(f"##### Q{idx + 1}. {question_text}")
                 
-                # Checkbox / inputs
                 if q_type == "mcq":
-                    # Store selected answer index in state
                     stored_answer = st.session_state.quiz_answers.get(idx, None)
-                    
-                    # Compute radio select index
                     select_idx = None
                     if stored_answer is not None and stored_answer in options:
                         select_idx = options.index(stored_answer)
@@ -793,15 +786,13 @@ if st.session_state.extracted_text:
                     )
                     st.session_state.quiz_answers[idx] = user_select.strip()
                 
-                # Display individual feedback after submission
                 if st.session_state.quiz_submitted:
                     user_ans = st.session_state.quiz_answers.get(idx, "")
                     is_correct = False
                     
                     if q_type in ["mcq", "tf"]:
                         is_correct = (user_ans == correct_ans)
-                    else:  # short
-                        # Loose case comparison
+                    else:
                         is_correct = (user_ans.lower() == correct_ans.lower())
                         
                     if is_correct:
@@ -816,19 +807,12 @@ if st.session_state.extracted_text:
                     </div>
                     """, unsafe_allow_html=True)
                 else:
-                    st.write("") # Spacer between questions
+                    st.write("")
                     
-            # Update score in state
             st.session_state.quiz_score = quiz_score_counter
-            
-            # Action buttons
             st.write("---")
             if not st.session_state.quiz_submitted:
                 if st.button("📤 Submit Quiz", type="primary", use_container_width=True):
-                    # Check if all questions are answered
-                    answered_count = len([k for k, v in st.session_state.quiz_answers.items() if v])
-                    if answered_count < len(quiz):
-                        st.warning("You haven't answered all questions yet, but we will grade your active answers.")
                     st.session_state.quiz_submitted = True
                     st.rerun()
             else:
@@ -852,14 +836,12 @@ if st.session_state.extracted_text:
     with tab_night:
         st.subheader("⚡ Night Before Exam Cram Sheet")
         
-        # Add a time controller
         time_cram = st.select_slider(
             "Select how many hours you have left to study:",
             options=["1 hour", "2 hours", "4 hours", "8 hours", "12 hours"],
             value="4 hours"
         )
         
-        # Trigger regeneration if cram slider changes
         if "cram_time_slider" not in st.session_state or st.session_state.cram_time_slider != time_cram:
             st.session_state.cram_time_slider = time_cram
             st.session_state.night_before_data = None
@@ -868,14 +850,12 @@ if st.session_state.extracted_text:
         col_left, col_right = st.columns([1, 1])
         
         with col_left:
-            # Must study
             st.markdown('<div class="premium-card">', unsafe_allow_html=True)
             st.markdown('<div class="card-header pill-red">🔥 MUST STUDY (High-Yield Core)</div>', unsafe_allow_html=True)
             for item in night_before.get("must_study", []):
                 st.markdown(f"- {item}")
             st.markdown('</div>', unsafe_allow_html=True)
             
-            # Likely exam topics
             st.markdown('<div class="premium-card">', unsafe_allow_html=True)
             st.markdown('<div class="card-header pill-yellow">🎯 Likely Exam Questions</div>', unsafe_allow_html=True)
             for item in night_before.get("likely_areas", []):
@@ -883,14 +863,12 @@ if st.session_state.extracted_text:
             st.markdown('</div>', unsafe_allow_html=True)
             
         with col_right:
-            # Cram Checklist
             st.markdown('<div class="premium-card">', unsafe_allow_html=True)
             st.markdown('<div class="card-header pill-green">✓ Quick Memory Checklist</div>', unsafe_allow_html=True)
             for item in night_before.get("checklist", []):
                 st.markdown(f"- {item}")
             st.markdown('</div>', unsafe_allow_html=True)
             
-            # Can skip
             st.markdown('<div class="premium-card">', unsafe_allow_html=True)
             st.markdown('<div class="card-header" style="color: #64748b;">💤 CAN SKIP (Low-Yield Details)</div>', unsafe_allow_html=True)
             for item in night_before.get("can_skip", []):
@@ -912,7 +890,7 @@ if st.session_state.extracted_text:
                 
             submitted = st.form_submit_button("📅 Generate Study Plan")
             if submitted:
-                st.session_state.study_plan_data = None # trigger reload
+                st.session_state.study_plan_data = None
                 
         subjects = [s.strip() for s in subject_input.split(",") if s.strip()]
         if not subjects:
@@ -920,14 +898,12 @@ if st.session_state.extracted_text:
             
         plan = generate_study_plan(subjects, days_left, hours_per_day)
         
-        # Recommendations
         st.markdown('<div class="premium-card">', unsafe_allow_html=True)
         st.markdown('<div class="card-header">🧠 Strategy Recommendations</div>', unsafe_allow_html=True)
         for rec in plan.get("priorityRecommendations", []):
             st.markdown(f"- {rec}")
         st.markdown('</div>', unsafe_allow_html=True)
         
-        # Schedule Timeline
         st.markdown("##### 📅 Daily Study Schedule")
         for day in plan.get("schedule", []):
             with st.expander(f"Day {day.get('day')} - {day.get('focus')} ({day.get('hours')} hours)"):
@@ -939,7 +915,6 @@ if st.session_state.extracted_text:
     with tab_tutor:
         st.subheader("🤖 Ask PrepWise AI Tutor")
         
-        # Selection mode for explanations
         tutor_mode = st.selectbox(
             "Customize AI Explanation Mode:",
             options=["Normal", "Simple Language", "Explain Like I'm 10 (ELI10)", "Tanglish (Tamil + English)", "Exam Oriented Tips"],
@@ -955,21 +930,17 @@ if st.session_state.extracted_text:
         }
         active_mode = mode_mapping[tutor_mode]
         
-        # Display chat interface
         for msg in st.session_state.chat_history:
             role_icon = "👤" if msg["role"] == "user" else "🤖"
             with st.chat_message(msg["role"], avatar=role_icon):
                 st.write(msg["content"])
                 
-        # Handle chat query input
         user_query = st.chat_input("Ask a question about your uploaded materials...")
         if user_query:
-            # Append user question
             st.session_state.chat_history.append({"role": "user", "content": user_query})
             with st.chat_message("user", avatar="👤"):
                 st.write(user_query)
                 
-            # Request response
             with st.chat_message("assistant", avatar="🤖"):
                 with st.spinner("AI Tutor is typing..."):
                     if backend_app.is_gemini_active:
@@ -978,7 +949,6 @@ if st.session_state.extracted_text:
                         if context:
                             system_instruction += f"\nUse the following student's study material as your source of truth: \n{context[:6000]}"
                             
-                        # Append formatting style
                         if active_mode == "simple":
                             system_instruction += "\nStyle Instruction: Explain in simple terms, breaking down jargon."
                         elif active_mode == "eli10":
@@ -989,9 +959,7 @@ if st.session_state.extracted_text:
                             system_instruction += "\nStyle Instruction: Focus strictly on exam strategies, scoring points, and typical pitfalls."
                             
                         try:
-                            # Use backend Gemini configuration
                             model = backend_app.genai.GenerativeModel("gemini-1.5-flash", system_instruction=system_instruction)
-                            # Convert history representation
                             h_formatted = [
                                 {"role": "user" if h["role"] == "user" else "model", "parts": [h["content"]]}
                                 for h in st.session_state.chat_history[:-1] if h.get("content")
@@ -1004,7 +972,6 @@ if st.session_state.extracted_text:
                     else:
                         reply = None
                         
-                    # Fallback reply if Gemini is inactive or failed
                     if not reply:
                         tutor_replies = {
                             "normal": "This is a great question. In the uploaded material, we learn that this concept is fundamental to the subject. Let me break down the details: it involves coordination between resources, following protocols, and ensuring consistency. For exams, remember that this prevents data errors and deadlocks.",
@@ -1019,7 +986,6 @@ if st.session_state.extracted_text:
                     st.session_state.chat_history.append({"role": "assistant", "content": reply})
                     
 else:
-    # Beautiful landing design for the app if no file has been uploaded
     st.markdown("""
     <div style="background: rgba(30, 41, 59, 0.5); border: 2px dashed rgba(59, 130, 246, 0.3); border-radius: 20px; padding: 3rem; text-align: center; max-width: 800px; margin: 2rem auto;">
         <div style="font-size: 4rem; margin-bottom: 1rem;">🎓</div>

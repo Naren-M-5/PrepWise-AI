@@ -150,5 +150,4 @@ If I have more time to work on this, I want to add:
 Engineering student interested in exploring how AI can be applied to build practical products that solve everyday problems.
 
 *   [GitHub](https://github.com/Naren-M-5)
-*   [LinkedIn](https://linkedin.com/in/your-profile)
-*   [Portfolio Website](https://your-portfolio.com)
+*   [LinkedIn](https://www.linkedin.com/in/naren007/)
